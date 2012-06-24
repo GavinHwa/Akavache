@@ -1,9 +1,12 @@
 using System;
 using System.IO;
 using System.Reactive.Concurrency;
+using System.Reactive.Windows.Foundation;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Reactive.Linq;
 using System.Reflection;
 using ReactiveUI;
+using Windows.Security.Cryptography.DataProtection;
 
 namespace Akavache
 {
@@ -15,6 +18,7 @@ namespace Akavache
             get { return _Current.Value; }
         }
 
+        readonly DataProtectionProvider dpapi = new DataProtectionProvider();
         protected EncryptedBlobCache(string cacheDirectory = null, IFilesystemProvider filesystemProvider = null, IScheduler scheduler = null) : base(cacheDirectory, filesystemProvider, scheduler)
         {
         }
@@ -25,12 +29,14 @@ namespace Akavache
 
         protected override IObservable<byte[]> BeforeWriteToDiskFilter(byte[] data, IScheduler scheduler)
         {
-            throw new NotImplementedException();
+            return dpapi.ProtectAsync(data.AsBuffer()).ToObservable()
+                .Select(x => x.ToArray());
         }
 
         protected override IObservable<byte[]> AfterReadFromDiskFilter(byte[] data, IScheduler scheduler)
         {
-            throw new NotImplementedException();
+            return dpapi.UnprotectAsync(data.AsBuffer()).ToObservable()
+                .Select(x => x.ToArray());
         }
 
         protected static string GetDefaultCacheDirectory()
