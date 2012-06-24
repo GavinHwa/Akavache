@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -33,7 +34,7 @@ namespace Akavache
         bool disposed;
         Dictionary<string, Tuple<CacheIndexEntry, byte[]>> cache = new Dictionary<string, Tuple<CacheIndexEntry, byte[]>>();
 
-        public void Insert(string key, byte[] data, DateTimeOffset? absoluteExpiration = new DateTimeOffset?())
+        public IObservable<Unit> Insert(string key, byte[] data, DateTimeOffset? absoluteExpiration = new DateTimeOffset?())
         {
             if (disposed) throw new ObjectDisposedException("TestBlobCache");
 
@@ -41,6 +42,13 @@ namespace Akavache
             {
                 cache[key] = new Tuple<CacheIndexEntry, byte[]>(new CacheIndexEntry(Scheduler.Now, absoluteExpiration), data);
             }
+
+            return Observable.Return(Unit.Default);
+        }
+
+        public IObservable<Unit> Flush()
+        {
+            return Observable.Return(Unit.Default);
         }
 
         public IObservable<byte[]> GetAsync(string key)
@@ -123,25 +131,19 @@ namespace Akavache
         {
             var local = BlobCache.LocalMachine;
             var user = BlobCache.UserAccount;
-#if !SILVERLIGHT
             var sec = BlobCache.Secure;
-#endif
 
             var resetBlobCache = new Action(() =>
             {
                 BlobCache.LocalMachine = local;
-#if !SILVERLIGHT
                 BlobCache.Secure = sec;
-#endif
                 BlobCache.UserAccount = user;
                 Monitor.Exit(gate);
             });
 
             var testCache = new TestBlobCache(resetBlobCache, scheduler, initialContents);
             BlobCache.LocalMachine = testCache;
-#if !SILVERLIGHT
             BlobCache.Secure = testCache;
-#endif
             BlobCache.UserAccount = testCache;
 
             Monitor.Enter(gate);

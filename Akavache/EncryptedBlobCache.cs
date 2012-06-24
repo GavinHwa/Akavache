@@ -3,6 +3,7 @@ using System.IO;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using ReactiveUI;
 
 namespace Akavache
@@ -27,13 +28,19 @@ namespace Akavache
         {
             try
             {
-                var ret = Observable.Return(DataProtectionApi.Encrypt(DataProtectionApi.KeyType.UserKey, data, null, null));
+#if SILVERLIGHT
+                var ret = Observable.Return(ProtectedData.Protect(data, null));
+#else
+                var ret = Observable.Return(ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser));
+#endif
+
 
                 // NB: MemoizedRequests will be null as we're disposing
                 if (MemoizedRequests != null)
                 {
                     lock(MemoizedRequests) MemoizedRequests.InvalidateAll();
                 }
+
                 return ret;
             } 
             catch(Exception ex)
@@ -48,7 +55,11 @@ namespace Akavache
             try
             {
                 string dontcare;
-                var ret = Observable.Return(DataProtectionApi.Decrypt(data, null, out dontcare));
+#if SILVERLIGHT
+                var ret = Observable.Return(ProtectedData.Unprotect(data, null));
+#else
+                var ret = Observable.Return(ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser));
+#endif
 
                 // NB: MemoizedRequests will be null as we're disposing
                 if (MemoizedRequests != null)
@@ -65,9 +76,13 @@ namespace Akavache
 
         protected static string GetDefaultCacheDirectory()
         {
+#if SILVERLIGHT
+            return "SecretCache";
+#else
             return RxApp.InUnitTestRunner() ?
                 Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "SecretCache") :
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), BlobCache.ApplicationName, "SecretCache");
+#endif
         }
     }
 }

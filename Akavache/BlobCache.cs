@@ -15,14 +15,13 @@ namespace Akavache
             {
                 localMachine = new TestBlobCache(RxApp.TaskpoolScheduler);
                 userAccount = new TestBlobCache(RxApp.TaskpoolScheduler);
-#if !SILVERLIGHT
                 secure = new TestBlobCache(RxApp.TaskpoolScheduler);
-#endif
             }
         }
 
         /// <summary>
-        /// 
+        /// Your application's name. Set this at startup, this defines where
+	/// your data will be stored (usually at %AppData%\[ApplicationName])
         /// </summary>
         public static string ApplicationName
         {
@@ -41,7 +40,9 @@ namespace Akavache
         static IBlobCache userAccount;
 
         /// <summary>
-        /// 
+        /// The local machine cache. Store data here that is unrelated to the
+	/// user account or shouldn't be uploaded to other machines (i.e.
+	/// image cache data)
         /// </summary>
         public static IBlobCache LocalMachine
         {
@@ -50,7 +51,9 @@ namespace Akavache
         }
 
         /// <summary>
-        /// 
+        /// The user account cache. Store data here that is associated with
+	/// the user; in large organizations, this data will be synced to all
+	/// machines via NT Roaming Profiles.
         /// </summary>
         public static IBlobCache UserAccount
         {
@@ -58,21 +61,21 @@ namespace Akavache
             set { userAccount = value; }
         }
 
-#if !SILVERLIGHT
         static ISecureBlobCache secure;
 
         /// <summary>
-        /// 
+        /// An IBlobCache that is encrypted - store sensitive data in this
+	/// cache such as login information.
         /// </summary>
         public static ISecureBlobCache Secure
         {
             get { return secure ?? EncryptedBlobCache.Current; }
             set { secure = value; }
         }
-#endif
 
         /// <summary>
-        /// 
+        /// An IBlobCache that simply stores data in memory. Data stored in
+	/// this cache will be lost when the application restarts.
         /// </summary>
         public static ISecureBlobCache InMemory
         {

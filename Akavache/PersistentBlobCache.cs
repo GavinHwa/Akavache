@@ -110,12 +110,12 @@ namespace Akavache
             public CPersistentBlobCache(string cacheDirectory) : base(cacheDirectory, null, RxApp.TaskpoolScheduler) { }
         }
 
-        public void Insert(string key, byte[] data, DateTimeOffset? absoluteExpiration = null)
+        public IObservable<Unit> Insert(string key, byte[] data, DateTimeOffset? absoluteExpiration = null)
         {
-            if (disposed) throw new ObjectDisposedException("PersistentBlobCache");
+            if (disposed) return Observable.Throw<Unit>(new ObjectDisposedException("PersistentBlobCache"));
             if (key == null || data == null)
             {
-                throw new ArgumentNullException();
+                return Observable.Throw<Unit>(new ArgumentNullException());
             }
 
             // NB: Since FetchOrWriteBlobFromDisk is guaranteed to not block,
@@ -130,6 +130,8 @@ namespace Akavache
                 err.LogErrors("Insert").Subscribe(
                     x => CacheIndex[key] = new CacheIndexEntry(Scheduler.Now, absoluteExpiration),
                     ex => Invalidate(key));
+
+                return err.Select(_ => Unit.Default);
             }
         }
 
@@ -397,6 +399,11 @@ namespace Akavache
 
         leave:
             return ret;
+        }
+
+        public IObservable<Unit> Flush()
+        {
+            return FlushCacheIndex(false);
         }
 
         IObservable<Unit> FlushCacheIndex(bool synchronous)
