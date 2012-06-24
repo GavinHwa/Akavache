@@ -51,7 +51,7 @@ namespace Akavache
             this.Scheduler = scheduler ?? RxApp.TaskpoolScheduler;
 
 #if WINRT
-            this.filesystem = filesystemProvider;
+            this.filesystem = filesystemProvider ?? new WinRTFilesystemProvider();
 #else
             this.filesystem = filesystemProvider ?? new SimpleFilesystemProvider();
 #endif
