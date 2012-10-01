@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Linq;
@@ -13,8 +12,8 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using NLog;
 using Newtonsoft.Json;
+using NLog;
 using ReactiveUI;
 
 namespace Akavache
@@ -83,14 +82,20 @@ namespace Akavache
             log.Info("{0} entries in blob cache index", CacheIndex.Count);
         }
 
+        public IServiceProvider ServiceProvider
+        {
+            get { return BlobCache.ServiceProvider; }
+        }
 
         static readonly Lazy<IBlobCache> _LocalMachine = new Lazy<IBlobCache>(() => new CPersistentBlobCache(GetDefaultLocalMachineCacheDirectory()));
+
         public static IBlobCache LocalMachine
         {
             get { return _LocalMachine.Value; }
         }
 
         static readonly Lazy<IBlobCache> _UserAccount = new Lazy<IBlobCache>(() => new CPersistentBlobCache(GetDefaultRoamingCacheDirectory()));
+
         public static IBlobCache UserAccount
         {
             get { return _UserAccount.Value; }
@@ -98,7 +103,9 @@ namespace Akavache
 
         class CPersistentBlobCache : PersistentBlobCache
         {
-            public CPersistentBlobCache(string cacheDirectory) : base(cacheDirectory, null, RxApp.TaskpoolScheduler) { }
+            public CPersistentBlobCache(string cacheDirectory) : base(cacheDirectory, null, RxApp.TaskpoolScheduler)
+            {
+            }
         }
 
         public IObservable<Unit> Insert(string key, byte[] data, DateTimeOffset? absoluteExpiration = null)
@@ -221,7 +228,6 @@ namespace Akavache
 
                     actionTaken.OnNext(Unit.Default);
                 };
-
             }
 
             try
@@ -456,7 +462,7 @@ namespace Akavache
 
         protected static string GetDefaultLocalMachineCacheDirectory()
         {
-            return RxApp.InUnitTestRunner() ?
+            return RxApp.InUnitTestRunner() ? 
                 Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "LocalBlobCache") :
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), BlobCache.ApplicationName, "BlobCache");
         }
