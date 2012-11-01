@@ -41,14 +41,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.4.5.10\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=4.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.4.0.1\lib\Net40\ReactiveUI.dll</HintPath>
-    </Reference>
-    <Reference Include="ReactiveUI.Testing, Version=4.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-testing.4.0.1\lib\Net40\ReactiveUI.Testing.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reactive.Core, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -92,6 +84,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ReactiveUI\ReactiveUI.Testing\ReactiveUI.Testing.csproj">
+      <Project>{e1f2ad19-276e-4d05-a41a-89aa133cecfc}</Project>
+      <Name>ReactiveUI.Testing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ReactiveUI\ReactiveUI\ReactiveUI.csproj">
+      <Project>{292a477b-bb94-43c1-984e-e177ef9fedb7}</Project>
+      <Name>ReactiveUI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Akavache\Akavache.csproj">
       <Project>{3EF05CA8-ED19-489C-AF42-71C4B6507AE7}</Project>
       <Name>Akavache</Name>
